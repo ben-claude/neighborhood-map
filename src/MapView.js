@@ -25,7 +25,7 @@ class MapView {
     this.bounds = new google.maps.LatLngBounds();
     this.locations.clear();
     for (const location of locations) {
-      this.locations.set(location.label, new LocationView(location));
+      this.locations.set(location.label, new LocationView(this.ko, location));
     }
     const locationValues = Array.from(this.locations.values());
     locationValues.forEach(location => {
@@ -45,6 +45,14 @@ class MapView {
       });
     });
     this.map.fitBounds(this.bounds);
+    //
+    /*
+    make map display responsively by using a window resize event
+    and call fitBounds method to make sure map markers always fit on screen as user resizes their browser window:
+    */
+    google.maps.event.addDomListener(window, 'resize', () => {
+      this.map.fitBounds(this.bounds);
+    });
   }
   onLocationClick({ label }) {
     const location = this.locations.get(label);

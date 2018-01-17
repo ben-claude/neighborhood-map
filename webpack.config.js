@@ -1,6 +1,7 @@
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 
 const config = {
   entry: './src/index.js',
@@ -23,7 +24,9 @@ const config = {
       },
       {
         loader: ExtractTextPlugin.extract({
-          use: 'css-loader', 
+          use: [
+            { loader: 'css-loader', options: { minimize: true } }
+          ],
         }),
         test: /\.css$/,
       },
@@ -32,8 +35,14 @@ const config = {
   plugins: [
     new ExtractTextPlugin('style.css'),
     new HtmlWebpackPlugin({
-      template: 'index.html'
+      template: 'index.html',
+      inject: false, // bundle.js and style.css are injected manually in index.html template
+      minify: {
+        removeComments: true,
+        collapseWhitespace: true,
+      },
     }),
+    new UglifyJsPlugin(),
   ],
 };
 //

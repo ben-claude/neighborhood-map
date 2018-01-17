@@ -2,14 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <!-- for media queries -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Neighborhood Map</title>
+
+  <!-- lodash template for html-webpack-plugin to inject styles.js -->
+  <% for (var css in htmlWebpackPlugin.files.css) { %>
+    <link href="<%= htmlWebpackPlugin.files.css[css] %>" rel="stylesheet">
+  <% } %>
+
 </head>
 <body class="container">
+
   <div class="menuview">
     <div class="menu">
       <button class="menu-btn" data-bind="click: onMenuClick">Menu</button>
     </div>
+
     <aside class="aside" data-bind="visible: shouldShowMenu">
       <section class="listview" data-bind="with: listView">
         <h2>Locations</h2>
@@ -20,6 +29,7 @@
           </li>
         </ul>
       </section>
+
       <section class="adminview" data-bind="with: adminView">
         <h2>Admin <input type="checkbox" data-bind="checked: contentDisplayed" /></h2>
         <div class="adminview-content" data-bind="visible: contentDisplayed">
@@ -53,10 +63,32 @@
       </section>
     </aside>
   </div>
-  <main class="mapview" data-bind="with: mapView">
+
+  <!-- the binding with ViewModel.mapView is added dynamically in ViewModel.js -->
+  <main class="mapview">
     <div id="map"></div>
   </main>
+
+  <!-- cannot be 'async' because '$' and 'ko' need to be defined when bundle.js is executed -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
   <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <!-- lodash template for html-webpack-plugin to inject bundle.js -->
+  <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+    <!-- cannot be 'async' because callbacks (onGoogleMapsFailure(), ...) need to be defined before google maps api is loaded -->
+    <script src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
+  <% } %>
+
+  <script async defer onerror="onGoogleMapsFailure()"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZkjL847cY6nQvRo2zhSdVYlMnC59JijA&v=3&callback=onGoogleMapsSuccess">
+  </script>
+
+  <!-- knockout.js template -->
+  <script type="text/html" id="locationview-template">
+    <h2 data-bind="text: label"></h2>
+    <div id="street-view" data-bind="html: streetViewContent"></div>
+    <div id="wikimedia" data-bind="html: wikimediaContent"></div>
+  </script>
+
 </body>
 </html>
