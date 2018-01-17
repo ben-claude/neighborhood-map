@@ -1,0 +1,21 @@
+.mapview {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  width: 100%;
+  position: relative; /* cf comment below in the #map rule */
+}
+
+#map {
+  min-height: 100vh;
+  /*
+  for the <div id="map"> to display correctly:
+  from https://stackoverflow.com/questions/27208987/google-maps-height-issue-with-css-flexbox-model
+  */
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+

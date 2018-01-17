@@ -1,0 +1,42 @@
+.container {
+  display: flex;
+  flex-direction: row;
+  min-height: 100vh; /* do not use 'height' instead of 'min-height': content total height can be bigger than the viewport height */
+  margin: 0;
+}
+
+.menuview {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.menu {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+}
+
+.menu-btn {
+  background-color: white;
+  padding: 0.5em;
+}
+
+.aside {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+@media screen and (max-width: 400px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .menu {
+    display: flex;
+  }
+}
+
