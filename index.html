@@ -69,26 +69,49 @@
     <div id="map"></div>
   </main>
 
-  <!-- cannot be 'async' because '$' and 'ko' need to be defined when bundle.js is executed -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
-
-  <!-- lodash template for html-webpack-plugin to inject bundle.js -->
-  <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
-    <!-- cannot be 'async' because callbacks (onGoogleMapsFailure(), ...) need to be defined before google maps api is loaded -->
-    <script src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
-  <% } %>
-
-  <script async defer onerror="onGoogleMapsFailure()"
-    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZkjL847cY6nQvRo2zhSdVYlMnC59JijA&v=3&callback=onGoogleMapsSuccess">
-  </script>
-
   <!-- knockout.js template -->
   <script type="text/html" id="locationview-template">
     <h2 data-bind="text: label"></h2>
     <div id="street-view" data-bind="html: streetViewContent"></div>
     <div id="wikimedia" data-bind="html: wikimediaContent"></div>
   </script>
+
+  <script async defer src="https://cdnjs.cloudflare.com/ajax/libs/knockout/3.4.2/knockout-min.js"></script>
+  <script async defer src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+  <script>
+    /*
+    - let's define:
+    script1: <script ... src="https://maps.googleapis.com...>
+    script2: <script ... src="bundle.js" >
+    - dependencies
+    script2 depends on script1 because we need to know the load status of google maps api in bundle.js
+    script1 depends on our code (which is usually in bundle.js) because we need to provide sucess/failure callbacks to google maps api
+    - so we use a promise here to break this dependency cycle:
+    script1 (bundle.js) uses a then() on this promise
+    and script2 resolve/reject the promise
+    - since all JS code is executed in the same thread, and since 'defer' is used,
+    all this JS code will be executed in the order defined in index.html
+    the promise is only here to break the code dependency cycle
+    */
+    window.googleMapsPromise = new Promise((resolve, reject) => {
+      window.onGoogleMapsSuccess = () => {
+        resolve();
+      };
+      window.onGoogleMapsFailure = () => {
+        reject();
+      };
+    });
+  </script>
+
+  <script async defer onerror="onGoogleMapsFailure()"
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCZkjL847cY6nQvRo2zhSdVYlMnC59JijA&v=3&callback=onGoogleMapsSuccess">
+  </script>
+
+  <!-- lodash template for html-webpack-plugin to inject bundle.js -->
+  <% for (var chunk in htmlWebpackPlugin.files.chunks) { %>
+    <script async defer src="<%= htmlWebpackPlugin.files.chunks[chunk].entry %>"></script>
+  <% } %>
 
 </body>
 </html>

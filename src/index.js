@@ -14,17 +14,7 @@ const config = {
   
 };
 
-// need to be executed immediately (not inside $()) for onGoogleMapsFailure()/onGoogleMapsSuccess() to be available globally in index.html
-const googleMapsPromise = new Promise((resolve, reject) => {
-  window.onGoogleMapsSuccess = () => {
-    resolve();
-  };
-  window.onGoogleMapsFailure = () => {
-    reject();
-  };
-});
-
 // to be sure that the DOM is ready (needed for knockout.js views)
 $(() => {
-  window.ko.applyBindings(new ViewModel(window.ko, config, new Model(config), googleMapsPromise));
+  window.ko.applyBindings(new ViewModel(window.ko, config, new Model(config), window.googleMapsPromise));
 });
